@@ -6,7 +6,6 @@ import {
   Param,
   Body,
   Query,
-  UsePipes,
   Patch,
 } from '@nestjs/common';
 import {
