@@ -44,6 +44,9 @@ export class UserDummyService {
   }
 
   create(user: Omit<UserDummy, 'id'>): UserDummy {
+    const emailExists = this.users.some((u) => u.email === user.email);
+    if (emailExists) throw new Error('EMAIL_EXISTS');
+
     const newUser = { ...user, id: Date.now() };
     this.users.push(newUser);
     return newUser;
@@ -62,9 +65,7 @@ export class UserDummyService {
         const emailExists = this.users.some(
           (user) => user.email === updatedUser.email && user.id !== id,
         );
-        if (emailExists) {
-          throw new Error('EMAIL_EXISTS');
-        }
+        if (emailExists) throw new Error('EMAIL_EXISTS');
       }
     }
 

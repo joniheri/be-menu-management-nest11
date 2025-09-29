@@ -41,12 +41,9 @@ export class UserDummyController {
   findOne(@Param('id') id: string) {
     try {
       const user = this.userDummyService.findOne(Number(id));
-      if (!user) {
-        return errorResponse(`User with ID ${id} not found`, 404);
-      }
       return successResponse(user, 'User retrieved successfully');
     } catch (error) {
-      return errorResponse(error.message, 400);
+      return errorResponse(error.message, 404);
     }
   }
 
@@ -54,19 +51,12 @@ export class UserDummyController {
   create(@Body() userInput: { name: string; email: string }) {
     try {
       validateOrThrow(createUserSchema, userInput);
-
-      const userByEmail = this.userDummyService.findByEmail(userInput.email);
-      if (userByEmail) {
-        return errorResponse(`Email already ${userInput.email} exists`, 400);
-      }
-
       const newUser = this.userDummyService.create(userInput);
-      if (!newUser) {
-        return errorResponse('Failed to create user', 400);
-      }
-
       return successResponse(newUser, 'User created successfully');
     } catch (error) {
+      if (error.message === 'EMAIL_EXISTS') {
+        return errorResponse('This email already exists', 400);
+      }
       return errorResponse(error.message, 400);
     }
   }
@@ -77,25 +67,17 @@ export class UserDummyController {
     @Body()
     userInput: {
       name?: string;
-      email: string;
+      email?: string;
     },
   ) {
     try {
       validateOrThrow(updateUserSchema, userInput);
-
-      const userById = this.userDummyService.findOne(Number(id));
-      if (!userById) {
-        return errorResponse(`User with ID ${id} not found`, 404);
-      }
-
-      const userByEmail = this.userDummyService.findByEmail(userInput.email);
-      if (userByEmail) {
-        return errorResponse(`Email already ${userInput.email} exists`, 400);
-      }
-
       const updatedUser = this.userDummyService.update(Number(id), userInput);
       return successResponse(updatedUser, 'User updated successfully');
     } catch (error) {
+      if (error.message === 'EMAIL_EXISTS') {
+        return errorResponse('This email already exists', 400);
+      }
       return errorResponse(error.message, 400);
     }
   }
@@ -103,9 +85,7 @@ export class UserDummyController {
   @Delete(':id')
   delete(@Param('id') id: number) {
     try {
-      if (!this.userDummyService.findOne(id)) {
-        return errorResponse(`User with ID ${id} not found`, 404);
-      }
+      this.userDummyService.delete(id);
       return successResponse(null, 'User deleted successfully');
     } catch (error) {
       return errorResponse(error.message, 400);
