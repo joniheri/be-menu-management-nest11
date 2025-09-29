@@ -16,27 +16,36 @@ import {
 import { validateOrThrow } from 'src/common/helpers/validate-or-throw.util';
 import { UserDummyService } from './user-dummy.service';
 import { createUserSchema, updateUserSchema } from './user-dummy.schema';
+import {
+  DocCreateUser,
+  DocDeleteUser,
+  DocFindAllUser,
+  DocGetUsersById,
+  DocUpdateUser,
+} from 'src/docs/user-dummy/user.doc';
 
 @Controller('user-dummy')
 export class UserDummyController {
   constructor(private readonly userDummyService: UserDummyService) {}
 
   @Get()
+  @DocFindAllUser()
   findAll(@Query('page') page = '1', @Query('size') size = '10') {
     try {
       const {
         data,
         currentPage,
-        size: pageSize,
+        size: perPage,
         totalData,
       } = this.userDummyService.findAll(Number(page), Number(size));
-      return paginatedResponse(data, currentPage, pageSize, totalData);
+      return paginatedResponse(data, currentPage, perPage, totalData);
     } catch (error) {
       return errorResponse(error.message, 400);
     }
   }
 
   @Get(':id')
+  @DocGetUsersById()
   findOne(@Param('id') id: string) {
     try {
       const user = this.userDummyService.findOne(Number(id));
@@ -47,6 +56,7 @@ export class UserDummyController {
   }
 
   @Post()
+  @DocCreateUser()
   create(@Body() userInput: { name: string; email: string }) {
     try {
       validateOrThrow(createUserSchema, userInput);
@@ -61,6 +71,7 @@ export class UserDummyController {
   }
 
   @Patch(':id')
+  @DocUpdateUser()
   update(
     @Param('id') id: string,
     @Body()
@@ -82,9 +93,10 @@ export class UserDummyController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: number) {
+  @DocDeleteUser()
+  delete(@Param('id') id: string) {
     try {
-      this.userDummyService.delete(id);
+      this.userDummyService.delete(Number(id));
       return successResponse(null, 'User deleted successfully');
     } catch (error) {
       return errorResponse(error.message, 400);

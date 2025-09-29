@@ -9,16 +9,16 @@ export function successResponse<T>(data: T, message = 'success') {
 export function paginatedResponse<T>(
   data: T[],
   currentPage: number,
-  size: number,
+  perPage: number,
   totalData: number,
   message = 'success',
 ) {
-  const totalPage = Math.ceil(totalData / size);
+  const totalPage = Math.ceil(totalData / perPage);
   return {
     status: 'success',
     message,
     currentPage,
-    size,
+    perPage,
     totalPage,
     totalData,
     data,
