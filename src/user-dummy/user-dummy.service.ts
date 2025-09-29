@@ -39,10 +39,6 @@ export class UserDummyService {
     return user;
   }
 
-  findByEmail(email: string): UserDummy | undefined {
-    return this.users.find((user) => user.email === email);
-  }
-
   create(user: Omit<UserDummy, 'id'>): UserDummy {
     const emailExists = this.users.some((u) => u.email === user.email);
     if (emailExists) throw new Error('EMAIL_EXISTS');
